@@ -1,0 +1,32 @@
+node_modules/
+dist/
+build/
+
+# Logs
+logs/
+*.log
+
+# Runtime
+.pids/
+events.jsonl
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# SQLite
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
