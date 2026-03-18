@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
+  "bin": {
+    "jules-daemon": "./dist/cli.js"
+  },
   "scripts": {
     "build": "tsc --build",
     "clean": "tsc --build --clean",
@@ -12,6 +15,7 @@
   },
   "dependencies": {
     "@jules-daemon/contracts": "*",
+    "commander": "^14.0.3",
     "sql.js": "^1.11.0"
   },
   "devDependencies": {
