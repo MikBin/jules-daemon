@@ -1,1 +1,1 @@
-export type { JulesApiClient } from "./jules-api-client.js";
+export type { JulesApiClient, CreateSessionParams } from "./jules-api-client.js";

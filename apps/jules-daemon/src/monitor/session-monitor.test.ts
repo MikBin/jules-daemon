@@ -10,6 +10,7 @@ import type { JulesSession, JulesSessionState } from "@jules-daemon/contracts";
 
 function makeApi(sessions: Map<string, JulesSession>): JulesApiClient {
   return {
+    createSession: async () => "sessions/new",
     getSession: async (id) => {
       const s = sessions.get(id);
       if (!s) throw new Error(`Session ${id} not found`);

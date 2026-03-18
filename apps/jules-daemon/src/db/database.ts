@@ -111,6 +111,15 @@ export class Database {
     );
   }
 
+  /** Return all stories that are not DONE. */
+  getActiveStories(): Record<string, unknown>[] {
+    const results = this.db.exec(
+      "SELECT * FROM stories WHERE status != 'DONE' ORDER BY created_at",
+    );
+    if (results.length === 0) return [];
+    return this.rowsToObjects(results[0]);
+  }
+
   // -------------------------------------------------------------------
   // Tasks
   // -------------------------------------------------------------------
@@ -181,6 +190,16 @@ export class Database {
     }
     stmt.free();
     return undefined;
+  }
+
+  /** Count tasks with status RUNNING across all stories (or a single story). */
+  getRunningTaskCount(storyId?: string): number {
+    const sql = storyId
+      ? "SELECT COUNT(*) as cnt FROM tasks WHERE status = 'RUNNING' AND story_id = ?"
+      : "SELECT COUNT(*) as cnt FROM tasks WHERE status = 'RUNNING'";
+    const results = this.db.exec(sql, storyId ? [storyId] : []);
+    if (results.length === 0) return 0;
+    return results[0].values[0][0] as number;
   }
 
   /** Return tasks whose dependencies are all DONE and that are still PENDING. */
