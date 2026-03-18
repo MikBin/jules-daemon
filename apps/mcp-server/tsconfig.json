@@ -5,8 +5,15 @@
     "outDir": "dist",
     "composite": true
   },
-  "include": ["src"],
+  "include": [
+    "src"
+  ],
   "references": [
-    { "path": "../../packages/contracts" }
+    {
+      "path": "../../packages/contracts"
+    },
+    {
+      "path": "../../apps/jules-daemon"
+    }
   ]
 }
