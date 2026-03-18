@@ -49,16 +49,19 @@ export class DaemonRunner {
   /**
    * Initializes internal components and starts the main loop.
    */
-  start(): void {
+  start(options?: { stuckMinutes?: number; maxParallelGlobal?: number }): void {
     if (this._running) return;
 
     // 1. Instantiate internal components
     this.monitor = new SessionMonitor(this.db, this.api, this.clock, {
       // Do not use SessionMonitor's internal polling loop
+      stuckMinutes: options?.stuckMinutes,
     });
 
     // Wire up dispatching components
-    this.dispatcher = new TaskDispatcher(this.db, this.api, this.monitor, this.clock);
+    this.dispatcher = new TaskDispatcher(this.db, this.api, this.monitor, this.clock, {
+      maxParallelGlobal: options?.maxParallelGlobal,
+    });
     this.completionHandler = new CompletionHandler(this.db, this.dispatcher, this.clock);
     this.router = new EventRouter(this.db, this.clock, this.completionHandler);
 

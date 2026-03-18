@@ -7,6 +7,7 @@ import { spawn } from "node:child_process";
 import { Database } from "./db/database.js";
 import { DaemonRunner } from "./daemon-runner.js";
 import { JulesApiHttpClient } from "./api/jules-api-http-client.js";
+import { config } from "./config.js";
 
 const JULES_DIR = path.join(os.homedir(), ".jules-daemon");
 if (!fs.existsSync(JULES_DIR)) {
@@ -14,7 +15,7 @@ if (!fs.existsSync(JULES_DIR)) {
 }
 
 const PID_FILE = path.join(JULES_DIR, "daemon.pid");
-const DB_FILE = path.join(JULES_DIR, "jules-daemon.sqlite");
+const DB_FILE = config.JULES_DB_PATH ? path.resolve(config.JULES_DB_PATH) : path.join(JULES_DIR, "jules-daemon.sqlite");
 const OUT_LOG = path.join(JULES_DIR, "daemon.out.log");
 const ERR_LOG = path.join(JULES_DIR, "daemon.err.log");
 
@@ -59,10 +60,15 @@ program
 
       try {
         const db = await Database.open(DB_FILE);
-        const api = new JulesApiHttpClient({ token: process.env.JULES_API_TOKEN ?? "dummy-token" });
-        const runner = new DaemonRunner(db, api);
+        const api = new JulesApiHttpClient({ token: config.JULES_API_TOKEN });
+        const runner = new DaemonRunner(db, api, {
+          pollIntervalMs: config.JULES_POLL_INTERVAL_MS,
+        });
 
-        runner.start();
+        runner.start({
+          stuckMinutes: config.JULES_STUCK_THRESHOLD_MS ? config.JULES_STUCK_THRESHOLD_MS / 60000 : undefined,
+          maxParallelGlobal: config.JULES_PARALLELISM_CAP,
+        });
 
         const shutdown = () => {
           console.log("\nShutting down daemon gracefully...");

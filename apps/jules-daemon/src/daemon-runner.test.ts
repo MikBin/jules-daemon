@@ -57,8 +57,8 @@ describe("DaemonRunner", () => {
     expect(runner.running).toBe(true);
 
     // Verify dependencies were instantiated
-    expect(SessionMonitor).toHaveBeenCalledWith(db, api, mockClock, {});
-    expect(TaskDispatcher).toHaveBeenCalledWith(db, api, expect.any(SessionMonitor), mockClock);
+    expect(SessionMonitor).toHaveBeenCalledWith(db, api, mockClock, { stuckMinutes: undefined });
+    expect(TaskDispatcher).toHaveBeenCalledWith(db, api, expect.any(SessionMonitor), mockClock, { maxParallelGlobal: undefined });
     expect(CompletionHandler).toHaveBeenCalledWith(db, expect.any(TaskDispatcher), mockClock);
     expect(EventRouter).toHaveBeenCalledWith(db, mockClock, expect.any(CompletionHandler));
 
