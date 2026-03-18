@@ -1,10 +1,12 @@
 import type { Database } from "../db/database.js";
 import crypto from "node:crypto";
+import type { CompletionHandler } from "../scheduler/completion-handler.js";
 
 /**
  * Routes unprocessed events to owner-agent inboxes.
  *
- * Events classified as `auto` are marked processed immediately.
+ * Events classified as `auto` are delegated to the CompletionHandler if they are 'completed',
+ * otherwise they are just marked processed immediately.
  * Events classified as `agent` or `human` produce inbox messages
  * for the owner agent, then are marked processed.
  */
@@ -12,26 +14,32 @@ export class EventRouter {
   constructor(
     private readonly db: Database,
     private readonly clock: () => string = () => new Date().toISOString(),
+    private readonly completionHandler?: CompletionHandler,
   ) {}
 
   /** Process all unprocessed events, routing each to the appropriate inbox. */
-  routeAll(): number {
+  async routeAll(): Promise<number> {
     const events = this.db.getUnprocessedEvents();
     let routed = 0;
     for (const event of events) {
-      this.routeEvent(event);
+      await this.routeEvent(event);
       routed++;
     }
     return routed;
   }
 
   /** Route a single event record. */
-  routeEvent(event: Record<string, unknown>): void {
+  async routeEvent(event: Record<string, unknown>): Promise<void> {
     const requires = event.requires as string;
     const eventId = event.event_id as string;
+    const eventType = event.event_type as string;
     const now = this.clock();
 
     if (requires === "auto") {
+      if (eventType === "completed" && this.completionHandler) {
+        await this.completionHandler.handleCompletion(event);
+      }
+
       // Auto events are just marked processed — no inbox delivery
       this.db.markEventProcessed(eventId, now);
       return;
