@@ -353,6 +353,48 @@ export class Database {
   }
 
   // -------------------------------------------------------------------
+  // Summaries
+  // -------------------------------------------------------------------
+
+  getSummary(): Record<string, unknown> {
+    const summary: Record<string, unknown> = {
+      stories: { OPEN: 0, IN_PROGRESS: 0, DONE: 0 },
+      PENDING: 0,
+      RUNNING: 0,
+      DONE: 0,
+      FAILED: 0,
+      BLOCKED: 0,
+      ESCALATED: 0,
+    };
+
+    const storyResults = this.db.exec("SELECT status, COUNT(*) as cnt FROM stories GROUP BY status");
+    if (storyResults.length > 0) {
+      for (const row of storyResults[0].values) {
+        const status = row[0] as string;
+        const count = row[1] as number;
+        (summary.stories as Record<string, number>)[status] = count;
+      }
+    }
+
+    const taskResults = this.db.exec(`
+      SELECT t.status, COUNT(*) as cnt
+      FROM tasks t
+      JOIN stories s ON t.story_id = s.story_id
+      WHERE s.status != 'DONE'
+      GROUP BY t.status
+    `);
+    if (taskResults.length > 0) {
+      for (const row of taskResults[0].values) {
+        const status = row[0] as string;
+        const count = row[1] as number;
+        summary[status] = count;
+      }
+    }
+
+    return summary;
+  }
+
+  // -------------------------------------------------------------------
   // Persistence helpers
   // -------------------------------------------------------------------
 

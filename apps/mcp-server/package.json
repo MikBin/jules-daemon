@@ -15,7 +15,8 @@
   "dependencies": {
     "@jules-daemon/contracts": "*",
     "@modelcontextprotocol/sdk": "^1.27.0",
-    "zod": "^3.25.0"
+    "zod": "^3.25.0",
+    "@jules-daemon/daemon": "*"
   },
   "devDependencies": {
     "tsx": "^4.0.0"
