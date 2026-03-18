@@ -15,6 +15,7 @@
     "sql.js": "^1.11.0"
   },
   "devDependencies": {
+    "@types/sql.js": "^1.4.9",
     "tsx": "^4.0.0"
   }
 }
